@@ -39,7 +39,7 @@ export function PublicLinkChip({ url, signupId, className = '' }: PublicLinkChip
 
   return (
     <div
-      className={`border-surface-sunk bg-surface-raised text-ink inline-flex max-w-full items-center rounded-full border py-0.5 pr-1 pl-3 text-[13px] ${className}`}
+      className={`border-surface-sunk bg-surface-raised text-ink inline-flex max-w-full items-center rounded-full border pr-1 pl-3 text-[13px] sm:py-0.5 ${className}`}
     >
       <span className="text-ink-muted border-surface-sunk mr-2 border-r pr-2 text-xs font-medium">
         Public link
@@ -50,7 +50,7 @@ export function PublicLinkChip({ url, signupId, className = '' }: PublicLinkChip
         onClick={handleCopy}
         aria-label="Copy public link"
         title="Copy"
-        className={`inline-flex items-center justify-center rounded-full p-1.5 transition ${
+        className={`inline-flex items-center justify-center rounded-full p-1.5 transition max-sm:size-11 ${
           copied ? 'bg-success/10 text-success' : 'text-ink-muted hover:text-ink'
         }`}
       >
@@ -66,7 +66,7 @@ export function PublicLinkChip({ url, signupId, className = '' }: PublicLinkChip
         rel="noopener noreferrer"
         aria-label="Open public page"
         title="Open"
-        className="text-ink-muted hover:text-ink inline-flex items-center justify-center rounded-full p-1.5 transition"
+        className="text-ink-muted hover:text-ink inline-flex items-center justify-center rounded-full p-1.5 transition max-sm:size-11"
       >
         <ExternalLink size={16} aria-hidden="true" />
       </a>
