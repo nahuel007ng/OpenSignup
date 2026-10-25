@@ -1,4 +1,4 @@
-import { useEffect, type ComponentType } from 'react';
+import { lazy, useEffect, type ComponentType } from 'react';
 import type { SharePanelProps } from './SharePanel';
 import { ShareUnavailable } from './ShareUnavailable';
 
@@ -27,20 +27,28 @@ export function loadSharePanel(): Promise<ComponentType<SharePanelProps>> {
   );
 }
 
-/**
- * What the panel's `lazy` loads. A promise answers a turn late even when
- * the code is already in, so `lazy` would still show its fallback, and
- * React keeps a fallback up for 300 ms once it's shown. So once the code is
- * in this answers at once, through a `then` that calls back straight away:
- * `lazy` only calls `then`, and takes an answer it gets during the call in
- * the same render, so the panel opens at its full height.
- */
-export function sharePanelModule(): Promise<PanelModule> {
+// What `SharePanel` loads. A promise answers a turn late even when the code
+// is already in, so `lazy` would still show its fallback, and React keeps a
+// fallback up for 300 ms once it's shown. So once the code is in this
+// answers at once, through a `then` that calls back straight away: `lazy`
+// only calls `then`, and takes an answer it gets during the call in the same
+// render, so the panel opens at its full height. It's no real promise, so
+// nothing else gets it.
+function sharePanelModule(): Promise<PanelModule> {
   const panel = loaded;
   if (!panel) return loadSharePanel().then((Panel) => ({ default: Panel }));
   const now = { then: (resolve: (value: PanelModule) => void) => resolve(panel) };
   return now as unknown as Promise<PanelModule>;
 }
+
+/**
+ * The panel's body, its QR encoder with it, for `ShareButton` to render.
+ * React's own lazy rather than next/dynamic, which is the same thing in the
+ * App Router plus a runtime of about 1.5 kB in every signup tab's first
+ * load; the panel renders only once it's opened, never on the server, so
+ * there's no `ssr: false` to want.
+ */
+export const SharePanel = lazy(sharePanelModule);
 
 /**
  * Starts loading the panel's code once the page is idle, so it's in before
