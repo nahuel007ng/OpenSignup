@@ -2,7 +2,7 @@
 
 import { lazy, Suspense, useId, useRef } from 'react';
 import { Share2, X } from 'lucide-react';
-import { loadSharePanel } from '@/components/share/load-share-panel';
+import { sharePanelModule, usePrefetchSharePanel } from '@/components/share/load-share-panel';
 import { PublishedMark, shareHeading } from '@/components/share/share-heading';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Popover } from '@/components/ui/Popover';
@@ -10,14 +10,15 @@ import { Spinner } from '@/components/ui/spinner';
 import { BAR_BUTTON, HEADER_BUTTON, PRIMARY } from './header-buttons';
 import { useShare } from './ShareScope';
 
-// The panel's body, its QR encoder with it, loads only when it first opens
-// (or as Publish is pressed), so none of it is in a signup page's first load.
-// Its heading and ✕ are here, so the panel is named and can be closed while
-// the body loads, and if it never does. React's own lazy rather than
-// next/dynamic, which is the same thing in the App Router plus a runtime of
-// about 1.5 kB in every signup tab's first load; the panel renders only once
-// it's opened, never on the server, so there's no `ssr: false` to want.
-const SharePanel = lazy(() => loadSharePanel().then((Panel) => ({ default: Panel })));
+// The panel's body, its QR encoder with it, loads once the page is idle (or
+// as Publish is pressed, or when it first opens), so none of it is in a
+// signup page's first load. Its heading and ✕ are here, so the panel is
+// named and can be closed while the body loads, and if it never does.
+// React's own lazy rather than next/dynamic, which is the same thing in the
+// App Router plus a runtime of about 1.5 kB in every signup tab's first
+// load; the panel renders only once it's opened, never on the server, so
+// there's no `ssr: false` to want.
+const SharePanel = lazy(sharePanelModule);
 
 /**
  * An open signup's Share, and the share panel it opens: a popover under the
@@ -34,6 +35,7 @@ export function ShareButton({ variant }: { variant: 'desktop' | 'phone' }) {
   const headingId = useId();
   const desktop = variant === 'desktop';
   const shown = share.open && share.desktop === desktop;
+  usePrefetchSharePanel();
 
   const panel = (
     <Suspense
