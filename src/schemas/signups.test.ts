@@ -24,6 +24,30 @@ describe('sendsReminders', () => {
   });
 });
 
+describe('title', () => {
+  // Three spaces pass a length check made before trimming; one space doesn't.
+  it.each(['   ', ' a '])('refuses %j on create', (title) => {
+    const r = SignupCreateInputSchema.safeParse({ title, settings: {} });
+    expect(r.success).toBe(false);
+    expect(r.error?.issues[0]?.path).toEqual(['title']);
+  });
+
+  it.each(['   ', ' a '])('refuses %j on update', (title) => {
+    const r = SignupUpdateInputSchema.safeParse({ title });
+    expect(r.success).toBe(false);
+    expect(r.error?.issues[0]?.path).toEqual(['title']);
+  });
+
+  it('trims the title on create', () => {
+    const r = SignupCreateInputSchema.parse({ title: ' Bake sale ', settings: {} });
+    expect(r.title).toBe('Bake sale');
+  });
+
+  it('trims the title on update', () => {
+    expect(SignupUpdateInputSchema.parse({ title: ' Bake sale ' }).title).toBe('Bake sale');
+  });
+});
+
 describe('visibility', () => {
   it('defaults to unlisted on create', () => {
     const r = SignupCreateInputSchema.parse({ title: 'Snack rota', settings: {} });
